@@ -5,7 +5,41 @@
 
 #include "WearLeveling.h"
 
-uint8_t curInput = 0;
+unsigned short curInput = 0;
+unsigned short volume = 0;
+short butState = LOW;
+
+unsigned long commitTimer = 0;
+
+void readInput() {
+  short newState = digitalRead(INPUT_BUTTON);
+  if (newState != butState) {
+    if (newState == HIGH) {
+      curInput += 1;
+      if (curInput > INP_MAX) {
+        curInput = INP_MIN;
+      }
+      relays.setInput(curInput);
+      //display.updateScreen(curInput, volume);
+    }
+    butState = newState;
+  }
+
+  if (commitTimer > 0 and commitTimer > millis() + COMMIT_TIMEOUT) {
+    writeValue(0, curInput);
+    commitTimer = 0;
+  }
+}
+
+void readVolume() {
+  unsigned short vol = analogRead(VOL_POT);
+  vol = map(vol, 0, 1023, 0, 255);
+  if (vol != volume) {
+    volume = vol;
+    relays.setVolume(volume);
+    //display.updateScreen(curInput, volume);
+  }
+}
 
 void setup() {
   Serial.begin(9600);
@@ -25,31 +59,14 @@ void setup() {
   relays.setInput(curInput);
 
   display.begin();
-  display.updateScreen();
-}
-
-uint8_t volume = 0;
-uint8_t butState = LOW;
-
-void loop() {
-  int vol = analogRead(VOL_POT);
-  vol = map(vol, 0, 1023, 0, 255);
-  if (vol != volume) {
-    volume = vol;
-    relays.setVolume(volume);
+  readVolume();
+  //in the event that volume really is zero, write to the screen
+  if (volume == 0) {
     display.updateScreen(curInput, volume);
   }
+}
 
-  uint8_t newState = digitalRead(INPUT_BUTTON);
-  if (newState != butState) {
-    if (newState == HIGH) {
-      curInput += 1;
-      if (curInput > INP_MAX) {
-        curInput = INP_MIN;
-      }
-      relays.setInput(curInput);
-      display.updateScreen(curInput, volume);
-    }
-    butState = newState;
-  }
+void loop() {
+  readVolume();
+  readInput();
 }

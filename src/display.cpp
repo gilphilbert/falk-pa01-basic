@@ -30,46 +30,8 @@ void Display::loop() {
   }
 }
 
-//function that puts the input and volume on the screen
-void Display::updateScreen() {
-  char volume [5];
-  if ((muteState == 0) && sysSettings.volume > 0) {
-    uint16_t v = round(((float)sysSettings.volume / (float)VOL_MAX) * 100);
-    itoa(v, volume, 10);
-    strcat(volume, "%");
-  } else {
-    String s = "MUTE";
-    strcpy(volume, s.c_str());
-  }
-  u8g2.clearBuffer();					// clear the internal memory
-
-  u8g2.setFont(u8g2_font_fub25_tf);
-
-  //vertically centers the text
-  uint16_t y = 49;
-  //left starting position for the volume (so it's right-aligned)
-  uint16_t x = 256 - u8g2.getStrWidth(volume);
-
-  u8g2.drawStr(0, y, sysSettings.inputs[sysSettings.input - 1].name.c_str());
-  u8g2.drawStr(x, y, volume);
-
-  u8g2.setFont(u8g2_font_crox1h_tr);
-  x = 256 - u8g2.getStrWidth("VOLUME");
-  u8g2.drawStr(0, 9, "INPUT");
-  u8g2.drawStr(x, 9, "VOLUME");
-
-  //max brightness
-  u8g2.setContrast(255);
-  //write data to screen
-  u8g2.sendBuffer();
-  //dim the display in 10s
-  if (sysSettings.dim == 1) {
-    screenTimer = millis();
-  }
-}
-
 //same as above, but used by ATMega chips (low memory, no settings)
-void updateScreen(uint8_t input, uint8_t vol) {
+void Display::updateScreen(unsigned short input, unsigned short vol) {
   char volume [5];
   if (vol > 0) {
     uint16_t v = round(((float)vol / (float)VOL_MAX) * 100);
@@ -104,6 +66,44 @@ void updateScreen(uint8_t input, uint8_t vol) {
   //max brightness
   u8g2.setContrast(255);
 
+  //dim the display in 10s
+  if (sysSettings.dim == 1) {
+    screenTimer = millis();
+  }
+}
+
+//function that puts the input and volume on the screen
+void Display::updateScreen() {
+  char volume [5];
+  if ((muteState == 0) && sysSettings.volume > 0) {
+    uint16_t v = round(((float)sysSettings.volume / (float)VOL_MAX) * 100);
+    itoa(v, volume, 10);
+    strcat(volume, "%");
+  } else {
+    String s = "MUTE";
+    strcpy(volume, s.c_str());
+  }
+  u8g2.clearBuffer();					// clear the internal memory
+
+  u8g2.setFont(u8g2_font_fub25_tf);
+
+  //vertically centers the text
+  uint16_t y = 49;
+  //left starting position for the volume (so it's right-aligned)
+  uint16_t x = 256 - u8g2.getStrWidth(volume);
+
+  u8g2.drawStr(0, y, sysSettings.inputs[sysSettings.input - 1].name.c_str());
+  u8g2.drawStr(x, y, volume);
+
+  u8g2.setFont(u8g2_font_crox1h_tr);
+  x = 256 - u8g2.getStrWidth("VOLUME");
+  u8g2.drawStr(0, 9, "INPUT");
+  u8g2.drawStr(x, 9, "VOLUME");
+
+  //max brightness
+  u8g2.setContrast(255);
+  //write data to screen
+  u8g2.sendBuffer();
   //dim the display in 10s
   if (sysSettings.dim == 1) {
     screenTimer = millis();

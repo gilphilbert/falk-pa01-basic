@@ -30,12 +30,12 @@
 
 // ====== DEFINE PINS ====== //
 
-#define SCREEN_CS               5
-#define SCREEN_DC               15
-#define SCREEN_RST              13
+#define SCREEN_CS               10//16
+#define SCREEN_DC               9//15
+#define SCREEN_RST              8//14
 
-#define INPUT_BUTTON            5
-#define VOL_POT                 26
+#define INPUT_BUTTON            6//12
+#define VOL_POT                 A0//23
 
 // ====== SETTINGS (INCL. DEFAULTS) ====== //
 typedef struct {
