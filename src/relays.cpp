@@ -88,6 +88,7 @@ void RelayController::endInputPulse() {
   InputRelayPulseTime = 0;
 };
 
+/*
 void RelayController::setVolume() {
   //select the volume GPIOs
   Wire.beginTransmission(MCP_VOLUME_ADDRESS);
@@ -107,6 +108,7 @@ void RelayController::setVolume() {
   Wire.endTransmission();
   VolumeRelayPulseTime = millis();
 }
+*/
 
 void RelayController::setVolume(int volume) {
   //select the volume GPIOs

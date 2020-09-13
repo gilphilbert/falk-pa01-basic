@@ -4,14 +4,16 @@
 
 // THIS BLOCK NEEDED FOR THE DISPLAY
 #include <SPI.h>
-#include "U8g2lib.h"
-// ^^ \libraries\U8g2\src\clib\u8g2.h <-- uncomment #define U8G2_16BIT
+#include <U8g2lib.h>
 
-// for the display
-// this uses the default SPI interface as defined by the manufacturer
-// NOTE: for the Adafruit HUZZAH32, use the *labelled pins*, not the standard ones for the ESP32
+//So you're here because the first few/last few lines of your display are missing, huh? You need to edit the display library, U8g2
+// browse to:
+//      <project path>/.pio/libdeps/ATmega328P/U8g2/src/clib/u8g2.h
+// uncomment the following line (it'll be somewhere around line 71...)
+// #define U8G2_16BIT
 
 #ifdef __AVR_ATmega328P__
+  //U8G2_SSD1322_NHD_256X64_1_4W_HW_SPI u8g2(U8G2_R2, 10, 9, 8);
   U8G2_SSD1322_NHD_256X64_1_4W_HW_SPI u8g2(U8G2_R2, SCREEN_CS, SCREEN_DC, SCREEN_RST);
 #else
   U8G2_SSD1322_NHD_256X64_F_4W_HW_SPI u8g2(U8G2_R2, SCREEN_CS, SCREEN_DC, SCREEN_RST);
@@ -51,10 +53,14 @@ void Display::updateScreen(unsigned short input, unsigned short vol) {
   u8g2.setFont(u8g2_font_crox1h_tr);
   uint16_t x2 = 256 - u8g2.getStrWidth("VOLUME");
 
+  String tStr = String("Input ") + String(input);
+  const char* input_name = tStr.c_str();
+
   u8g2.firstPage();
   do {
+
     u8g2.setFont(u8g2_font_fub25_tf);
-    u8g2.drawStr(0, y, sysSettings.inputs[sysSettings.input - 1].name.c_str());
+    u8g2.drawStr(0, y, input_name);
     u8g2.drawStr(x, y, volume);
 
     u8g2.setFont(u8g2_font_crox1h_tr);
@@ -137,4 +143,13 @@ void Display::wifiScreen(const char* ssid) {
 void Display::dimScreen() {
   u8g2.setContrast(1);
   screenTimer = 0;
+}
+
+void Display::test() {
+  u8g2.firstPage();
+  do {
+    u8g2.setFont(u8g2_font_ncenB10_tr);
+    u8g2.drawStr(0,24,"Hello World!");
+  } while ( u8g2.nextPage() );
+  delay(5000);
 }

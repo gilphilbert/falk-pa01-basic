@@ -27,19 +27,21 @@ void readInput() {
 
   if (commitTimer > 0 and commitTimer > millis() + COMMIT_TIMEOUT) {
     writeValue(0, curInput);
-    commitTimer = 0;
+    commitTimer = 0; 
   }
 }
 
 void readVolume() {
   unsigned short vol = analogRead(VOL_POT);
-  vol = map(vol, 0, 1023, 0, 255);
+  vol = 255 - map(vol, 0, 1023, 0, 255);
   if (vol != volume) {
     volume = vol;
     relays.setVolume(volume);
-    //display.updateScreen(curInput, volume);
+    Serial.println(volume);
+    display.updateScreen(curInput, volume);
   }
 }
+
 
 void setup() {
   Serial.begin(9600);
@@ -51,7 +53,7 @@ void setup() {
   relays.setInput(0);
   relays.setVolume(0);
 
-  loadEeprom(0);
+  //loadEeprom(0);
   curInput = getValue(0);
   if (curInput < INP_MIN || curInput >> INP_MAX) {
     curInput = INP_MIN;
@@ -59,6 +61,7 @@ void setup() {
   relays.setInput(curInput);
 
   display.begin();
+  //display.test();
   readVolume();
   //in the event that volume really is zero, write to the screen
   if (volume == 0) {

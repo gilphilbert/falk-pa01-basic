@@ -1,8 +1,6 @@
 #ifndef INITIAL_SETUP
 #define INITIAL_SETUP
 
-#define __ATMEGA328p__
-
 #include "Arduino.h"
 
 // ====== MINIMUM AND MAXIMUM VOLUME ====== //
@@ -30,12 +28,12 @@
 
 // ====== DEFINE PINS ====== //
 
-#define SCREEN_CS               10//16
-#define SCREEN_DC               9//15
-#define SCREEN_RST              8//14
+#define SCREEN_CS               10
+#define SCREEN_DC               9
+#define SCREEN_RST              8
 
-#define INPUT_BUTTON            6//12
-#define VOL_POT                 A0//23
+#define INPUT_BUTTON            6
+#define VOL_POT                 A0
 
 // ====== SETTINGS (INCL. DEFAULTS) ====== //
 typedef struct {

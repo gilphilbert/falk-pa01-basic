@@ -9,6 +9,7 @@ class Display {
     void updateScreen();
     void wifiScreen(const char* ssid);
     void dimScreen();
+    void test();
 };
 
 #endif
