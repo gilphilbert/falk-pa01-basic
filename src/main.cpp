@@ -1,44 +1,62 @@
 #include <Arduino.h>
 #include <Wire.h>
 
+#include <EEPROMex.h>
+
 #include "falk-pre-conf.h"
 
-#include "WearLeveling.h"
-
-unsigned short curInput = 0;
-unsigned short volume = 0;
 short butState = LOW;
 
 unsigned long commitTimer = 0;
+
+int settingsAddress;
+
+void restoreSettings() {
+  EEPROM.setMaxAllowedWrites(5);
+  int savedAddress = EEPROM.getAddress(sizeof(int));
+  settingsAddress = EEPROM.getAddress(sizeof(DeviceSettings));
+
+  int yn = EEPROM.readInt(savedAddress);
+
+  if(yn > 0) {
+    EEPROM.readBlock<DeviceSettings>(settingsAddress, sysSettings);
+  } else {
+    for(int i = INP_MIN; i <= INP_MAX; i++) {
+      sysSettings.inputs[i - 1].enabled = true;
+      sysSettings.inputs[i - 1].icon = "";
+      sysSettings.inputs[i - 1].name = String("Input ") + String(i);;
+    }
+    EEPROM.writeBlock<DeviceSettings>(settingsAddress, sysSettings);
+    EEPROM.writeInt(savedAddress, 1);
+  }
+}
+
+void writeSettings() { 
+  EEPROM.updateBlock<DeviceSettings>(settingsAddress, sysSettings);
+}
 
 void readInput() {
   short newState = digitalRead(INPUT_BUTTON);
   if (newState != butState) {
     if (newState == HIGH) {
-      curInput += 1;
-      if (curInput > INP_MAX) {
-        curInput = INP_MIN;
+      sysSettings.input += 1;
+      if (sysSettings.input > INP_MAX) {
+        sysSettings.input = INP_MIN;
       }
-      relays.setInput(curInput);
-      //display.updateScreen(curInput, volume);
+      relays.setInput(sysSettings.input);
+      display.updateScreen();
     }
     butState = newState;
-  }
-
-  if (commitTimer > 0 and commitTimer > millis() + COMMIT_TIMEOUT) {
-    writeValue(0, curInput);
-    commitTimer = 0; 
   }
 }
 
 void readVolume() {
-  unsigned short vol = analogRead(VOL_POT);
+  int16_t vol = analogRead(VOL_POT);
   vol = 255 - map(vol, 0, 1023, 0, 255);
-  if (vol != volume) {
-    volume = vol;
-    relays.setVolume(volume);
-    Serial.println(volume);
-    display.updateScreen(curInput, volume);
+  if (vol != sysSettings.volume) {
+    sysSettings.volume = vol;
+    relays.setVolume(sysSettings.volume);
+    display.updateScreen();
   }
 }
 
@@ -53,23 +71,23 @@ void setup() {
   relays.setInput(0);
   relays.setVolume(0);
 
-  //loadEeprom(0);
-  curInput = getValue(0);
-  if (curInput < INP_MIN || curInput >> INP_MAX) {
-    curInput = INP_MIN;
-  }
-  relays.setInput(curInput);
+  restoreSettings();
+  relays.setInput(sysSettings.input);
 
   display.begin();
-  //display.test();
   readVolume();
   //in the event that volume really is zero, write to the screen
-  if (volume == 0) {
-    display.updateScreen(curInput, volume);
+  if (sysSettings.volume == 0) {
+    display.updateScreen();
   }
 }
 
 void loop() {
   readVolume();
   readInput();
+
+  if (commitTimer > 0 and commitTimer > millis() + COMMIT_TIMEOUT) {
+    writeSettings();
+    commitTimer = 0; 
+  }
 }

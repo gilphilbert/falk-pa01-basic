@@ -44,11 +44,10 @@ typedef struct {
 
 typedef struct {
   int16_t volume = 26;
-  int16_t input = 1;
+  int16_t input = INP_MIN;
   DeviceInput inputs [INP_MAX];
   uint16_t saved = 0;
   int dim = 1;
-  int icon = 0;
   int maxVol = VOL_MAX;
   int maxStartVol = -1;
 } DeviceSettings;
